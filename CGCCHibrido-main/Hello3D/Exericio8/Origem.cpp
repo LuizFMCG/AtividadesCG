@@ -159,12 +159,12 @@ int main()
 		// Poligono Preenchido - GL_TRIANGLES
 		
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 18);
+		glDrawArrays(GL_TRIANGLES, 0, 36); 
 
 		// Chamada de desenho - drawcall
 		// CONTORNO - GL_LINE_LOOP
 		
-		glDrawArrays(GL_POINTS, 0, 18);
+		glDrawArrays(GL_POINTS, 0, 36);
 		glBindVertexArray(0);
 
 		// Troca os buffers da tela
@@ -270,36 +270,55 @@ int setupGeometry()
 	// Cada atributo do vértice (coordenada, cores, coordenadas de textura, normal, etc)
 	// Pode ser arazenado em um VBO único ou em VBOs separados
 	GLfloat vertices[] = {
+		// Base do cubo (face inferior)
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 0
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 1
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 2
+		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 0
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 2
+		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 3
 
-		//Base da pirâmide: 2 triângulos
-		//x    y    z    r    g    b
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		-0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		// Topo do cubo (face superior)
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 4
+		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 5
+		 0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 6
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 4
+		 0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 6
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 7
 
-		 -0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		  0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		  0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		// Face dianteira
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 3
+		 0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 2
+		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 6
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 3
+		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 6
+		-0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 7
 
-		 //
-		 -0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		  0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		// Face traseira
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 0
+		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 1
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 5
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 0
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 5
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 4
 
-		  -0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		  0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
-		  -0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
+		// Face esquerda
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 0
+		-0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 3
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 7
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 0
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 7
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 4
 
-		   -0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		  0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-
-		   0.5, -0.5, 0.5, 0.0, 1.0, 1.0,
-		  0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
-		  0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
-
-
+		// Face direita
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 1
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 2
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 6
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 1
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 6
+		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 5
 	};
+
 
 	GLuint VBO, VAO;
 
