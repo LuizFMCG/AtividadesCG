@@ -4,13 +4,15 @@
  * para a disciplina de Processamento Gráfico - Jogos Digitais - Unisinos
  * Versão inicial: 7/4/2017
  * Última atualização em 12/05/2023
+ * Adaptado por Luiz Felipe Giacobbo para a Tarefa - Instanciando objetos na cena do Módulo 2 de Computação Gráfica
+ * Utilizei "<" e ">" para diminuir e aumentar a escala, respectivamente 
  *
  */
 
 #include <iostream>
 #include <string>
 #include <assert.h>
-
+#include <vector>// Para usar a classe vector para atender a parte "Instanciar mais de um cubo na cena" da Tarefa - Instanciando objetos na cena 3D - Luiz Felipe Giacobbo
 using namespace std;
 
 // GLAD
@@ -24,6 +26,8 @@ using namespace std;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f); // Inicialmente, não há translação
+float scale = 1.0f; // Escala inicial é 1 (sem escala)
 
 // Protótipo da função de callback de teclado
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -79,7 +83,7 @@ int main()
 //#endif
 
 	// Criação da janela GLFW
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Ola 3D -- Rossana!", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Ola 3D -- Luiz Felipe Giacobbo!", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Fazendo o registro da função de callback para a janela GLFW
@@ -121,6 +125,14 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
+	// Modificação 3 para Tarefa - Instanciando objetos na cena - Luiz Felipe Giacobbo:
+	// Instanciar mais de um cubo na cena 
+	std::vector<glm::vec3> cubePositions = {
+	glm::vec3(0.0f,  0.0f,  0.0f), // Primeiro cubo (central)
+	glm::vec3(-0.6f,  0.0f,  0.0f), // Segundo cubo (à esquerda)
+	glm::vec3(0.6f,  0.0f,  0.0f)  // Terceiro cubo (à direita)
+	};
+	
 
 	// Loop da aplicação - "game loop"
 	while (!glfwWindowShouldClose(window))
@@ -137,39 +149,38 @@ int main()
 
 		float angle = (GLfloat)glfwGetTime();
 
-		model = glm::mat4(1); 
-		if (rotateX)
-		{
-			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
-			
-		}
-		else if (rotateY)
-		{
-			model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
-
-		}
-		else if (rotateZ)
-		{
-			model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-
-		}
-
-		glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
-		// Chamada de desenho - drawcall
-		// Poligono Preenchido - GL_TRIANGLES
-		
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36); 
+		for (unsigned int i = 0; i < cubePositions.size(); ++i) {
+			glm::vec3 cubePos = cubePositions[i];
 
-		// Chamada de desenho - drawcall
-		// CONTORNO - GL_LINE_LOOP
-		
-		glDrawArrays(GL_POINTS, 0, 36);
+			model = glm::mat4(1);
+			// Adicionando translação e escala à matriz model
+			model = glm::translate(model, cubePos + translation);
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
+
+			if (rotateX)
+			{
+				model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			else if (rotateY)
+			{
+				model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+			}
+			else if (rotateZ)
+			{
+				model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+			}
+
+			glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36); // Desenha o cubo
+		}
 		glBindVertexArray(0);
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
 	}
+
 	// Pede pra OpenGL desalocar os buffers
 	glDeleteVertexArrays(1, &VAO);
 	// Finaliza a execução da GLFW, limpando os recursos alocados por ela
@@ -177,9 +188,13 @@ int main()
 	return 0;
 }
 
+
 // Função de callback de teclado - só pode ter uma instância (deve ser estática se
 // estiver dentro de uma classe) - É chamada sempre que uma tecla for pressionada
 // ou solta via GLFW
+// Modificação 2 para Tarefa - Instanciando objetos na cena 3D - Luiz Felipe Giacobbo:
+// "No projeto de base, ao pressionar as teclas x, y e z, a pirâmide rotaciona nos respectivos eixos. 
+// Adicione controle via teclado para:(...)"
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -206,8 +221,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		rotateZ = true;
 	}
 
+	// "Mover (transladar) o cubo nos 3 eixos (sugestão de teclas WASD para os eixos x e z, IJ para o eixo y)"
+	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		translation.z -= 0.1f;
+	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		translation.z += 0.1f;
+	if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		translation.x -= 0.1f;
+	if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		translation.x += 0.1f;
+	if (key == GLFW_KEY_I && action == GLFW_PRESS)
+		translation.y += 0.1f;
+	if (key == GLFW_KEY_J && action == GLFW_PRESS)
+		translation.y -= 0.1f;
 
-
+	// "Promover a escala uniforme do cubo (sugestão de teclas [ para diminuir e ] para aumentar)"
+	// Utilizei "<" e ">" para diminuir e aumentar a escala, respectivamente.
+	if (key == GLFW_KEY_COMMA && action == GLFW_PRESS)
+		scale *= 0.9f; // diminui a escala
+	if (key == GLFW_KEY_PERIOD && action == GLFW_PRESS)
+		scale *= 1.1f; // aumenta a escala
 }
 
 //Esta função está basntante hardcoded - objetivo é compilar e "buildar" um programa de
@@ -269,55 +302,62 @@ int setupGeometry()
 	// sequencial, já visando mandar para o VBO (Vertex Buffer Objects)
 	// Cada atributo do vértice (coordenada, cores, coordenadas de textura, normal, etc)
 	// Pode ser arazenado em um VBO único ou em VBOs separados
+	// Modificação 1 para Tarefa - Instanciando objetos na cena - Luiz Felipe Giacobbo:
+	// "Alterar a geometria da pirâmide, transformando-a em um cubo (adicionar os vértices e triângulos necessários). 
+	// Sugere-se fazer cada lado do cubo (composto de 2 triângulos, similar à base da pirâmide) de uma cor diferente, 
+	// para que facilite nossa visualização neste momento que ainda não utilizamos texturas e iluminação adequada."
+	GLfloat scale = 1.0f / 3.0f; // Fator de escala para reduzir o tamanho do cubo em 1/3, para aparecerem os 3 na tela
+
 	GLfloat vertices[] = {
 		// Base do cubo (face inferior)
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 0
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 1
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 2
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // vértice 0
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 2
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,  // vértice 3
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 0
+		 0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 1
+		 0.5f * scale, -0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 2
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 0
+		 0.5f * scale, -0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 2
+		-0.5f * scale, -0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 0.0f,  // vértice 3
 
 		// Topo do cubo (face superior)
-		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 4
-		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 5
-		 0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 6
-		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // vértice 4
-		 0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 6
-		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  // vértice 7
+		-0.5f * scale,  0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 4
+		 0.5f * scale,  0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 5
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 6
+		-0.5f * scale,  0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 4
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 6
+		-0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 0.0f,  // vértice 7
 
 		// Face dianteira
-		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 3
-		 0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 2
-		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 6
-		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 3
-		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 6
-		-0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,  // vértice 7
+		-0.5f * scale, -0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 3
+		 0.5f * scale, -0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 2
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 6
+		-0.5f * scale, -0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 3
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 6
+		-0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 0.0f, 1.0f,  // vértice 7
 
 		// Face traseira
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 0
-		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 1
-		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 5
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 0
-		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 5
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  // vértice 4
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 0
+		 0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 1
+		 0.5f * scale,  0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 5
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 0
+		 0.5f * scale,  0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 5
+		-0.5f * scale,  0.5f * scale, -0.5f * scale, 1.0f, 1.0f, 0.0f,  // vértice 4
 
 		// Face esquerda
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 0
-		-0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 3
-		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 7
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 0
-		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // vértice 7
-		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  // vértice 4
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 0
+		-0.5f * scale, -0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 3
+		-0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 7
+		-0.5f * scale, -0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 0
+		-0.5f * scale,  0.5f * scale,  0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 7
+		-0.5f * scale,  0.5f * scale, -0.5f * scale, 0.0f, 1.0f, 1.0f,  // vértice 4
 
 		// Face direita
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 1
-		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 2
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 6
-		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 1
-		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f,  // vértice 6
-		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  // vértice 5
+		 0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 1
+		 0.5f * scale, -0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 2
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 6
+		 0.5f * scale, -0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 1
+		 0.5f * scale,  0.5f * scale,  0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 6
+		 0.5f * scale,  0.5f * scale, -0.5f * scale, 1.0f, 0.0f, 1.0f,  // vértice 5
 	};
+
 
 
 	GLuint VBO, VAO;
